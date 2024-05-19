@@ -1,0 +1,56 @@
+name: Update Flipper Application Catalog
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'application.fam'
+
+jobs:
+  update-catalog:
+    runs-on: ubuntu-latest
+
+    env:
+      BRANCH_PREFIX: zacharyweiss/
+      APP_NAME: magspoof
+      APP_FOLDER: GPIO
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        
+    - name: Get fap_version
+      id: fap_version
+      run: |
+        fap_version_raw=$(grep -oP '(?<=fap_version=\()\d+, \d+(?=\))' application.fam)
+        echo "v_major=$(echo $fap_version_raw | cut -d "," -f 1 | xargs)" >> "$GITHUB_ENV"
+        echo "v_minor=$(echo $fap_version_raw | cut -d "," -f 2 | xargs)" >> "$GITHUB_ENV"
+        echo "branch_name=${{ env.BRANCH_PREFIX }}${{ env.APP_NAME }}_v$v_major.$v_minor" >> "$GITHUB_ENV"
+        
+    - name: Fork Flipper Application Catalog
+      uses: actions/checkout@v3
+      with:
+        repository: 'flipperdevices/flipper-application-catalog'
+        path: 'flipper-application-catalog'
+        
+    - name: Create Branch
+      run: |
+        cd flipper-application-catalog
+        git checkout -b "${{ env.branch_name }}"
+      
+    - name: Update manifest.yml
+      run: |
+        manifest_path=applications/${{ env.APP_FOLDER }}/${{ env.APP_NAME }}/manifest.yml
+        echo "manifest_path=$manifest_path" > "$GITHUB_ENV"
+        echo "commit_sha: ${{ github.sha }}" >> flipper-application-catalog/$manifest_path
+        
+    - name: Commit and Push
+      run: |
+        cd flipper-application-catalog
+        git config user.name 'GitHub Actions Bot'
+        git config user.email '<>'
+        git add applications/GPIO/magspoof/manifest.yml
+        git commit -m "Update magspoof manifest with commit ${{ github.sha }}"
+        git push origin "zacharyweiss/magspoof_v${{ steps.fap_version.outputs.fap_version }}"
