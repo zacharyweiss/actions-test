@@ -49,6 +49,7 @@ jobs:
       run: |
         manifest_path=applications/${{ env.APP_FOLDER }}/${{ env.APP_NAME }}/manifest.yml
         echo "manifest_path=$manifest_path" > "$GITHUB_ENV"
+        touch ${{ env.CATALOG_FOLDER }}/$manifest_path
         echo "commit_sha: ${{ github.sha }}" >> ${{ env.CATALOG_FOLDER }}/$manifest_path
 
     
