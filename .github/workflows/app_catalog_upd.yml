@@ -53,6 +53,6 @@ jobs:
         cd flipper-application-catalog
         git config user.name 'GitHub Actions Bot'
         git config user.email '<>'
-        git add applications/GPIO/magspoof/manifest.yml
-        git commit -m "Update magspoof manifest with commit ${{ github.sha }}"
-        git push origin "zacharyweiss/magspoof_v${{ steps.fap_version.outputs.fap_version }}"
+        git add ${{ env.manifest_path }}
+        git commit -m "Update ${{ env.APP_NAME }} manifest for v${{ env.v_major }}.${{ env.v_minor }} @ commit ${{ github.sha }}"
+        git push origin "${{ env.branch_name }}"
