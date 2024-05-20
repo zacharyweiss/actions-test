@@ -19,13 +19,15 @@ jobs:
       CATALOG_FOLDER: actions-test-remote
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        path: ${{ APP_NAME }}
         
     - name: Get fap_version
       id: fap_version
       run: |
+        cd ${{ APP_NAME }}
         fap_version_raw=$(grep -oP '(?<=fap_version=\()\d+, \d+(?=\))' application.fam)
         v_major=$(echo $fap_version_raw | cut -d "," -f 1 | xargs)
         v_minor=$(echo $fap_version_raw | cut -d "," -f 2 | xargs)
@@ -34,15 +36,15 @@ jobs:
         echo "branch_name=${{ env.BRANCH_PREFIX }}${{ env.APP_NAME }}_v$v_major.$v_minor" >> "$GITHUB_ENV"
         
     - name: Fork Flipper Application Catalog
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: ${{ env.CATALOG_REPO }}
         path: ${{ env.CATALOG_FOLDER }}
         
-    - name: Create Branch
-      run: |
-        cd ${{ env.CATALOG_FOLDER }}
-        git checkout -b "${{ env.branch_name }}"
+#    - name: Create Branch
+#      run: |
+#        cd ${{ env.CATALOG_FOLDER }}
+#        git checkout -b "${{ env.branch_name }}"
 
 
     - name: Update manifest.yml
@@ -57,13 +59,10 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v6
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         path: ${{ env.CATALOG_FOLDER }}
         commit-message: Update report
-        committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
-        author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
-        signoff: false
-        branch: main
+        branch: ${{ env.branch_name }}
+        # base: 
         delete-branch: true
         title: '[Example] Update'
         body: |
