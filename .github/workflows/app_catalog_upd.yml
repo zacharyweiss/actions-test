@@ -47,7 +47,7 @@ jobs:
         cd $CATALOG_FOLDER
         git checkout -b "$branch_name"
         git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$CATALOG_REPO.git"
-        git remote add upstream "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$UPSTREAM_REPO.git"
+        git remote add upstream "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$CATALOG_UPSTREAM.git"
         git fetch upstream main
         git remote -v
         git rebase --autosquash --autostash "upstream/main"
@@ -55,10 +55,10 @@ jobs:
 
     - name: Update manifest.yml
       run: |
-        manifest_path=applications/${{ env.APP_FOLDER }}/${{ env.APP_NAME }}/manifest.yml
+        manifest_path=applications/$APP_FOLDER/$APP_NAME/manifest.yml
         echo "manifest_path=$manifest_path" > "$GITHUB_ENV"
-        touch ${{ env.CATALOG_FOLDER }}/$manifest_path
-        echo "commit_sha: ${{ github.sha }}" >> ${{ env.CATALOG_FOLDER }}/$manifest_path
+        touch $CATALOG_FOLDER/$manifest_path
+        echo "commit_sha: ${{ github.sha }}" >> $CATALOG_FOLDER/$manifest_path
 
     - name: Commit & Push
       run: |
