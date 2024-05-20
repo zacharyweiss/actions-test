@@ -2,4 +2,4 @@ App(
     foo=bar,
     fap_version=(0, 0)
     DEAD=BEEF,
-    )
+)
