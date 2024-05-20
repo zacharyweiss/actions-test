@@ -47,7 +47,7 @@ jobs:
         cd $CATALOG_FOLDER
         git checkout -b "$branch_name"
         git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$CATALOG_REPO.git"
-        git remote add upstream "$UPSTREAM_REPO"
+        git remote add upstream "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$UPSTREAM_REPO.git"
         git fetch upstream main
         git remote -v
         git rebase --autosquash --autostash "upstream/main"
