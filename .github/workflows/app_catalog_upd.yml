@@ -22,12 +22,12 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        path: ${{ APP_NAME }}
+        path: ${{ env.APP_NAME }}
         
     - name: Get fap_version
       id: fap_version
       run: |
-        cd ${{ APP_NAME }}
+        cd ${{ env.APP_NAME }}
         fap_version_raw=$(grep -oP '(?<=fap_version=\()\d+, \d+(?=\))' application.fam)
         v_major=$(echo $fap_version_raw | cut -d "," -f 1 | xargs)
         v_minor=$(echo $fap_version_raw | cut -d "," -f 2 | xargs)
