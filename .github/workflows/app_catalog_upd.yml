@@ -41,17 +41,17 @@ jobs:
       with:
         repository: ${{ env.CATALOG_REPO }}
         path: ${{ env.CATALOG_FOLDER }}
+        token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
         
     - name: Create Branch
       run: |
         cd $CATALOG_FOLDER
         git checkout -b "$branch_name"
-        git remote set-url origin "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_REPO.git"
-        git remote add upstream "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_UPSTREAM.git"
         git fetch upstream main
         git remote -v
         git rebase --autosquash --autostash "upstream/main"
-        
+#        git remote set-url origin "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_REPO.git"
+#        git remote add upstream "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_UPSTREAM.git"        
 
     - name: Update manifest.yml
       run: |
@@ -60,14 +60,23 @@ jobs:
         touch $CATALOG_FOLDER/$manifest_path
         echo "commit_sha: ${{ github.sha }}" >> $CATALOG_FOLDER/$manifest_path
 
-    - name: Commit & Push
+    - name: Commit
       run: |
         cd $CATALOG_FOLDER
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-        git add applications/GPIO/magspoof/manifest.yml
+        git add .
         git commit -m "Update magspoof manifest with commit ${{ github.sha }}"
-        git push --force -u origin HEAD
+#        git push --force -u origin HEAD
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
+        directory: ${{ env.CATALOG_FOLDER }}
+        branch: ${{ env.branch_name }}
+        repo: ${{ env.CATALOG_REPO }}
+        force: true
 
 
     
