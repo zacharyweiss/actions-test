@@ -57,8 +57,7 @@ jobs:
       run: |
         manifest_path=applications/$APP_FOLDER/$APP_NAME/manifest.yml
         echo "manifest_path=$manifest_path" > "$GITHUB_ENV"
-        touch $CATALOG_FOLDER/$manifest_path
-        echo "commit_sha: ${{ github.sha }}" >> $CATALOG_FOLDER/$manifest_path
+        sed -i 's/commit_sha: .*/commit_sha: ${{ github.sha }}/' $CATALOG_FOLDER/$manifest_path
 
     - name: Commit
       run: |
@@ -66,7 +65,7 @@ jobs:
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
         git add .
-        git commit -m "Update magspoof manifest with commit ${{ github.sha }}"
+        git commit -m "Update ${APP_NAME} manifest for v${v_major}.${v_minor} @ ${{ github.sha }}"
 #        git push --force -u origin HEAD
 
     - name: Push changes
@@ -77,8 +76,6 @@ jobs:
         branch: ${{ env.branch_name }}
         repository: ${{ env.CATALOG_REPO }}
         force: true
-
-
     
 #    - name: Create Pull Request
 #      id: cpr
