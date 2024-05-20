@@ -75,7 +75,7 @@ jobs:
         github_token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
         directory: ${{ env.CATALOG_FOLDER }}
         branch: ${{ env.branch_name }}
-        repo: ${{ env.CATALOG_REPO }}
+        repository: ${{ env.CATALOG_REPO }}
         force: true
 
 
