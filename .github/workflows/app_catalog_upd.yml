@@ -16,6 +16,7 @@ jobs:
       APP_NAME: magspoof
       APP_FOLDER: GPIO
       CATALOG_REPO: zacharyweiss/flipper-application-catalog
+      CATALOG_UPSTREAM: flipperdevices/flipper-application-catalog
       CATALOG_FOLDER: flipper-application-catalog
     
     steps:
@@ -43,11 +44,14 @@ jobs:
         
     - name: Create Branch
       run: |
-        cd ${{ env.CATALOG_FOLDER }}
-        git fetch upstream
-        git checkout -b "${{ env.branch_name }}"
-        git merge upstream/main
-
+        cd $CATALOG_FOLDER
+        git checkout -b "$branch_name"
+        git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$CATALOG_REPO.git"
+        git remote add upstream "$UPSTREAM_REPO"
+        git fetch upstream main
+        git remote -v
+        git rebase --autosquash --autostash "upstream/main"
+        
 
     - name: Update manifest.yml
       run: |
@@ -58,12 +62,12 @@ jobs:
 
     - name: Commit & Push
       run: |
-        cd ${{ env.CATALOG_FOLDER }}
-        git config user.name 'GitHub Actions Bot'
-        git config user.email '<>'
+        cd $CATALOG_FOLDER
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
         git add applications/GPIO/magspoof/manifest.yml
         git commit -m "Update magspoof manifest with commit ${{ github.sha }}"
-        git push origin "${{ env.branch_name }}"
+        git push --force origin "$branch_name"
 
 
     
