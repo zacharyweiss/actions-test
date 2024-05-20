@@ -59,6 +59,7 @@ jobs:
       id: cpr
       uses: peter-evans/create-pull-request@v6
       with:
+        token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
         path: ${{ env.CATALOG_FOLDER }}
         commit-message: Update report
         branch: ${{ env.branch_name }}
