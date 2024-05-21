@@ -1,5 +1,5 @@
 App(
-    appid="actionstest",  # Must be unique
+    appid="actionstest",
     name="[ASDF] AppName",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="actionstest_app",
