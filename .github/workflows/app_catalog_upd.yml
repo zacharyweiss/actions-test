@@ -64,9 +64,9 @@ jobs:
       run: |
         MANIFEST_PATH=applications/$FAP_CATEGORY/$APPID/manifest.yml
         echo "MANIFEST_PATH=$MANIFEST_PATH" > "$GITHUB_ENV"
-        mkdir -p $CATALOG_FOLDER/$(dirname $MANIFEST_PATH)
-        touch $CATALOG_FOLDER/$MANIFEST_PATH
-        echo "commit_sha: ${{ github.sha }}" >> $CATALOG_FOLDER/$MANIFEST_PATH
+        mkdir -p $CATALOG_REPO/$(dirname $MANIFEST_PATH)
+        touch $CATALOG_REPO/$MANIFEST_PATH
+        echo "commit_sha: ${{ github.sha }}" >> $CATALOG_REPO/$MANIFEST_PATH
 
     - name: Commit
       run: |
