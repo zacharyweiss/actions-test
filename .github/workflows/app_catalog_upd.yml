@@ -15,8 +15,8 @@ jobs:
       CATALOG_REPO: flipper-application-catalog
       CATALOG_FORK_OWNER: ${{ github.repository_owner }}
       CATALOG_UPSTREAM_OWNER: flipperdevices
-      COMMIT_USERNAME: ${{ github.actor}}
-      COMMIT_EMAIL: ${{ github.actor }}@users.noreply.github.com
+      COMMIT_USERNAME: ${{ github.actor }}
+      COMMIT_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
     
     steps:
     - name: Checkout app repo `${{ github.repository }}`
@@ -68,8 +68,31 @@ jobs:
         echo "MANIFEST_PATH=$MANIFEST_PATH" >> "$GITHUB_ENV"
         mkdir -p $CATALOG_REPO/$(dirname $MANIFEST_PATH)
         touch $CATALOG_REPO/$MANIFEST_PATH
-        echo "commit_sha: ${{ github.sha }}" >> $CATALOG_REPO/$MANIFEST_PATH
+        OLD_SHA=9b27c27b306dc46ea342f3aa32e42ab3f5eaf510
+        echo "OLD_SHA=$OLD_SHA" >> "$GITHUB_ENV"
+        CHANGES=$(git log --oneline --no-merges --pretty=format:"%h (%an) %s" $OLD_SHA..${{ github.sha }} )
+
+        cat >$CATALOG_REPO/$MANIFEST_PATH <<EOF
+        sourcecode:
+          type: git
+          location:
+            origin: https://github.com/${{ github.repository }}.git
+            commit_sha: ${{ github.sha }}
+        short_description: Test application
+        description: "foo"
+        changelog: |
+          $CHANGES
+        screenshots:
+          - screenshots/ss0.png
+        EOF
+#        OLD_SHA=$(grep -oP '(?<=commit_sha: )[a-zA-Z0-9]+' $CATALOG_REPO/$MANIFEST_PATH)
 #        sed -i 's/commit_sha: .*/commit_sha: ${{ github.sha }}/' $CATALOG_REPO/$MANIFEST_PATH
+    - name: Auto-changelog test
+      run: |
+        cd app
+        echo $CHANGES
+        
+#         > ../$CATALOG_REPO/applications/$FAP_CATEGORY/$APPID/CHANGELOG.md
 
     - name: Commit
       run: |
@@ -89,6 +112,7 @@ jobs:
         repository: ${{ env.CATALOG_FORK_OWNER }}/${{ env.CATALOG_REPO }}
         force: true
 
+      # TODO: borrow bundle action from https://github.com/flipperdevices/flipper-application-catalog/blob/main/.github/actions/bundle/action.yml
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
