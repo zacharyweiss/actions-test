@@ -70,7 +70,10 @@ jobs:
         touch $CATALOG_REPO/$MANIFEST_PATH
         OLD_SHA=9b27c27b306dc46ea342f3aa32e42ab3f5eaf510
         echo "OLD_SHA=$OLD_SHA" >> "$GITHUB_ENV"
+        
+        cd app
         CHANGES=$(git log --oneline --no-merges --pretty=format:"%h (%an) %s" $OLD_SHA..${{ github.sha }} )
+        cd ..
 
         cat >$CATALOG_REPO/$MANIFEST_PATH <<EOF
         sourcecode:
