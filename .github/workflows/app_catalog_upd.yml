@@ -37,7 +37,7 @@ jobs:
         
         echo "V_MAJOR=$V_MAJOR" >> "$GITHUB_ENV"
         echo "V_MINOR=$V_MINOR" >> "$GITHUB_ENV"
-        echo "NAME=$NAME" >> "$GITHUB_ENV"
+        echo "NAME=$(echo $NAME | sed -e 's/\[.*\]//' | xargs)" >> "$GITHUB_ENV"
         echo "APPID=$APPID" >> "$GITHUB_ENV"
         echo "FAP_CATEGORY=$FAP_CATEGORY" >> "$GITHUB_ENV"
         echo "BRANCH_NAME=${CATALOG_FORK_OWNER}/${APPID}_${V_MAJOR}.${V_MINOR}" >> "$GITHUB_ENV"
