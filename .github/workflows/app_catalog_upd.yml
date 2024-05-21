@@ -19,7 +19,8 @@ jobs:
       COMMIT_EMAIL: ${{ github.actor }}@users.noreply.github.com
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout app repo `${{ github.repository }}`
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         path: app
@@ -42,14 +43,14 @@ jobs:
         echo "FAP_CATEGORY=$FAP_CATEGORY" >> "$GITHUB_ENV"
         echo "BRANCH_NAME=${CATALOG_FORK_OWNER}/${APPID}_${V_MAJOR}.${V_MINOR}" >> "$GITHUB_ENV"
         
-    - name: Fork Flipper Application Catalog
+    - name: Checkout catalog fork `${{ env.CATALOG_FORK_OWNER }}/${{ env.CATALOG_REPO }}`
       uses: actions/checkout@v4
       with:
         repository: ${{ env.CATALOG_FORK_OWNER }}/${{ env.CATALOG_REPO }}
         path: ${{ env.CATALOG_REPO }}
         token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
         
-    - name: Create Branch
+    - name: Create branch `${{ env.BRANCH_NAME }}`
       run: |
         cd $CATALOG_REPO
         git checkout -b "$BRANCH_NAME"
@@ -58,15 +59,17 @@ jobs:
         git remote -v
         git rebase --autosquash --autostash "upstream/main"
 
-    - name: Update manifest.yml
+    - name: Update manifest.yml `commit_sha`
       # mkdir and touch are bad practice, as the folder & manifest should initially be created manually
+      # (and this should be allowed to fail if they don't exist)
       # but this lets me run tests without my test app having been accepted into the catalog
       run: |
         MANIFEST_PATH=applications/$FAP_CATEGORY/$APPID/manifest.yml
-        echo "MANIFEST_PATH=$MANIFEST_PATH" > "$GITHUB_ENV"
+        echo "MANIFEST_PATH=$MANIFEST_PATH" >> "$GITHUB_ENV"
         mkdir -p $CATALOG_REPO/$(dirname $MANIFEST_PATH)
         touch $CATALOG_REPO/$MANIFEST_PATH
         echo "commit_sha: ${{ github.sha }}" >> $CATALOG_REPO/$MANIFEST_PATH
+#        sed -i 's/commit_sha: .*/commit_sha: ${{ github.sha }}/' $CATALOG_REPO/$MANIFEST_PATH
 
     - name: Commit
       run: |
@@ -77,7 +80,7 @@ jobs:
         git commit -m "Update ${NAME} manifest for v${V_MAJOR}.${V_MINOR} @ ${{ github.sha }}"
 #        git push --force -u origin HEAD
 
-    - name: Push changes
+    - name: Push
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
@@ -85,3 +88,16 @@ jobs:
         branch: ${{ env.BRANCH_NAME }}
         repository: ${{ env.CATALOG_FORK_OWNER }}/${{ env.CATALOG_REPO }}
         force: true
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+        cache: 'pip' # caching pip dependencies
+
+    - name: Setup dependencies & toolchain; validate bundle
+      run: |
+        cd $CATALOG_REPO
+        pip install -r tools/requirements.txt
+        ufbt update
+        python3 tools/bundle.py --nolint $MANIFEST_PATH bundle.zip
