@@ -1,6 +1,6 @@
 App(
     appid="actionstest",  # Must be unique
-    name="App actionstest",  # Displayed in menus
+    name="[ASDF] AppName",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="actionstest_app",
     stack_size=2 * 1024,
