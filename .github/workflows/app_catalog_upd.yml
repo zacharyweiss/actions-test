@@ -31,13 +31,16 @@ jobs:
         APPID=$(grep -oP '(?<=appid=\").*(?=\")' application.fam)
         FAP_CATEGORY=$(grep -oP '(?<=fap_category=\").*(?=\")' application.fam)
         FAP_VERSION=$(grep -oP '(?<=fap_version=\()\d+, \d+(?=\))' application.fam)
+
+        V_MAJOR=$(echo $FAP_VERSION | cut -d "," -f 1 | xargs)
+        V_MINOR=$(echo $FAP_VERSION | cut -d "," -f 2 | xargs)
         
-        echo "V_MAJOR=$(echo $FAP_VERSION | cut -d "," -f 1 | xargs)" >> "$GITHUB_ENV"
-        echo "V_MINOR=$(echo $FAP_VERSION | cut -d "," -f 2 | xargs)" >> "$GITHUB_ENV"
+        echo "V_MAJOR=$V_MAJOR" >> "$GITHUB_ENV"
+        echo "V_MINOR=$V_MINOR" >> "$GITHUB_ENV"
         echo "NAME=$NAME" >> "$GITHUB_ENV"
         echo "APPID=$APPID" >> "$GITHUB_ENV"
         echo "FAP_CATEGORY=$FAP_CATEGORY" >> "$GITHUB_ENV"
-        echo "BRANCH_NAME=${CATALOG_FORK_OWNER}/${NAME}_${V_MAJOR}.${V_MINOR}" >> "$GITHUB_ENV"
+        echo "BRANCH_NAME=${CATALOG_FORK_OWNER}/${APPID}_${V_MAJOR}.${V_MINOR}" >> "$GITHUB_ENV"
         
     - name: Fork Flipper Application Catalog
       uses: actions/checkout@v4
