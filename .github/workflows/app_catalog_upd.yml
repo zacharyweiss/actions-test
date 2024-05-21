@@ -12,83 +12,70 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      BRANCH_PREFIX: zacharyweiss/
-      APP_NAME: magspoof
-      APP_FOLDER: GPIO
-      CATALOG_REPO: zacharyweiss/flipper-application-catalog
-      CATALOG_UPSTREAM: flipperdevices/flipper-application-catalog
-      CATALOG_FOLDER: flipper-application-catalog
+      CATALOG_REPO: flipper-application-catalog
+      CATALOG_FORK_OWNER: ${{ github.repository_owner }}
+      CATALOG_UPSTREAM_OWNER: flipperdevices
+      COMMIT_USERNAME: ${{ github.actor}}
+      COMMIT_EMAIL: ${{ github.actor }}@users.noreply.github.com
     
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        path: ${{ env.APP_NAME }}
+        path: app
         
-    - name: Get fap_version
-      id: fap_version
+    - name: Get application.fam details
       run: |
-        cd $APP_NAME
-        fap_version_raw=$(grep -oP '(?<=fap_version=\()\d+, \d+(?=\))' application.fam)
-        v_major=$(echo $fap_version_raw | cut -d "," -f 1 | xargs)
-        v_minor=$(echo $fap_version_raw | cut -d "," -f 2 | xargs)
-        echo "v_major=$v_major" >> "$GITHUB_ENV"
-        echo "v_minor=$v_minor" >> "$GITHUB_ENV"
-        echo "branch_name=${BRANCH_PREFIX}${APP_NAME}_v${v_major}.${v_minor}" >> "$GITHUB_ENV"
+        cd app
+        NAME=$(grep -oP '(?<=name=\")[a-zA-Z]+(?=\")' application.fam)
+        APPID=$(grep -oP '(?<=appid=\")[a-zA-Z]+(?=\")' application.fam)
+        FAP_CATEGORY=$(grep -oP '(?<=fap_category=\")[a-zA-Z]+(?=\")' application.fam)
+        FAP_VERSION=$(grep -oP '(?<=fap_version=\()\d+, \d+(?=\))' application.fam)
+        
+        echo "V_MAJOR=$(echo $FAP_VERSION | cut -d "," -f 1 | xargs)" >> "$GITHUB_ENV"
+        echo "V_MINOR=$(echo $FAP_VERSION | cut -d "," -f 2 | xargs)" >> "$GITHUB_ENV"
+        echo "NAME=$NAME" >> "$GITHUB_ENV"
+        echo "APPID=$APPID" >> "$GITHUB_ENV"
+        echo "FAP_CATEGORY=$FAP_CATEGORY" >> "$GITHUB_ENV"
+        echo "BRANCH_NAME=${CATALOG_FORK_OWNER}/${NAME}_${V_MAJOR}.${V_MINOR}" >> "$GITHUB_ENV"
         
     - name: Fork Flipper Application Catalog
       uses: actions/checkout@v4
       with:
-        repository: ${{ env.CATALOG_REPO }}
-        path: ${{ env.CATALOG_FOLDER }}
+        repository: ${{ env.CATALOG_FORK_OWNER }}/${{ env.CATALOG_REPO }}
+        path: ${{ env.CATALOG_REPO }}
         token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
         
     - name: Create Branch
       run: |
-        cd $CATALOG_FOLDER
-        git checkout -b "$branch_name"
-        git remote add upstream "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_UPSTREAM.git"        
+        cd $CATALOG_REPO
+        git checkout -b "$BRANCH_NAME"
+        git remote add upstream "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_UPSTREAM_OWNER/$CATALOG_REPO.git"        
         git fetch upstream main
         git remote -v
         git rebase --autosquash --autostash "upstream/main"
-#        git remote set-url origin "https://x-access-token:${{ secrets.CATALOG_UPDATE_TOKEN }}@github.com/$CATALOG_REPO.git"
 
     - name: Update manifest.yml
       run: |
-        manifest_path=applications/$APP_FOLDER/$APP_NAME/manifest.yml
-        echo "manifest_path=$manifest_path" > "$GITHUB_ENV"
-        sed -i 's/commit_sha: .*/commit_sha: ${{ github.sha }}/' $CATALOG_FOLDER/$manifest_path
+        MANIFEST_PATH=applications/$FAP_CATEGORY/$APPID/manifest.yml
+        echo "MANIFEST_PATH=$MANIFEST_PATH" > "$GITHUB_ENV"
+        touch $CATALOG_FOLDER/$MANIFEST_PATH
+        echo "commit_sha: ${{ github.sha }}" >> $CATALOG_FOLDER/$MANIFEST_PATH
 
     - name: Commit
       run: |
-        cd $CATALOG_FOLDER
-        git config user.name "$GITHUB_ACTOR"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+        cd $CATALOG_REPO
+        git config user.name "${COMMIT_USERNAME}"
+        git config user.email "${COMMIT_EMAIL}"
         git add .
-        git commit -m "Update ${APP_NAME} manifest for v${v_major}.${v_minor} @ ${{ github.sha }}"
+        git commit -m "Update ${NAME} manifest for v${V_MAJOR}.${V_MINOR} @ ${{ github.sha }}"
 #        git push --force -u origin HEAD
 
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
-        directory: ${{ env.CATALOG_FOLDER }}
-        branch: ${{ env.branch_name }}
-        repository: ${{ env.CATALOG_REPO }}
+        directory: ${{ env.CATALOG_REPO }}
+        branch: ${{ env.BRANCH_NAME }}
+        repository: ${{ env.CATALOG_FORK_OWNER }}/${{ env.CATALOG_REPO }}
         force: true
-    
-#    - name: Create Pull Request
-#      id: cpr
-#      uses: peter-evans/create-pull-request@v6
-#      with:
-#        token: ${{ secrets.CATALOG_UPDATE_TOKEN }}
-#        path: ${{ env.CATALOG_FOLDER }}
-#        commit-message: Update report
-#        branch: ${{ env.branch_name }}
-#        # base: 
-#       delete-branch: true
-#        title: '[Example] Update'
-#        body: |
-#          Update report
-#          - Auto-generated by [create-pull-request][1]
-#        draft: false
