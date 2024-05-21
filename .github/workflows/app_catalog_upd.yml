@@ -27,9 +27,9 @@ jobs:
     - name: Get application.fam details
       run: |
         cd app
-        NAME=$(grep -oP '(?<=name=\")[a-zA-Z]+(?=\")' application.fam)
-        APPID=$(grep -oP '(?<=appid=\")[a-zA-Z]+(?=\")' application.fam)
-        FAP_CATEGORY=$(grep -oP '(?<=fap_category=\")[a-zA-Z]+(?=\")' application.fam)
+        NAME=$(grep -oP '(?<=name=\").*(?=\")' application.fam)
+        APPID=$(grep -oP '(?<=appid=\").*(?=\")' application.fam)
+        FAP_CATEGORY=$(grep -oP '(?<=fap_category=\").*(?=\")' application.fam)
         FAP_VERSION=$(grep -oP '(?<=fap_version=\()\d+, \d+(?=\))' application.fam)
         
         echo "V_MAJOR=$(echo $FAP_VERSION | cut -d "," -f 1 | xargs)" >> "$GITHUB_ENV"
