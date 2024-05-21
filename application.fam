@@ -7,5 +7,5 @@ App(
     fap_category="GPIO",
     fap_version=(0, 1),
     fap_icon="actionstest.png",
-    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_icon_assets="images",
 )
