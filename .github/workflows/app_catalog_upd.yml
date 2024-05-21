@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: zacharyweiss/flipper-app-catalog-action@v0.1
+      - uses: zacharyweiss/flipper-app-catalog-action@v0.2
         with:
           CATALOG_UPDATE_TOKEN: ${{ secrets.CATALOG_UPDATE_TOKEN }}
           DRY_RUN: true
