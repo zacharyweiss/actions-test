@@ -59,9 +59,12 @@ jobs:
         git rebase --autosquash --autostash "upstream/main"
 
     - name: Update manifest.yml
+      # mkdir and touch are bad practice, as the folder & manifest should initially be created manually
+      # but this lets me run tests without my test app having been accepted into the catalog
       run: |
         MANIFEST_PATH=applications/$FAP_CATEGORY/$APPID/manifest.yml
         echo "MANIFEST_PATH=$MANIFEST_PATH" > "$GITHUB_ENV"
+        mkdir -p $CATALOG_FOLDER/$(dirname $MANIFEST_PATH)
         touch $CATALOG_FOLDER/$MANIFEST_PATH
         echo "commit_sha: ${{ github.sha }}" >> $CATALOG_FOLDER/$MANIFEST_PATH
 
