@@ -36,7 +36,7 @@ jobs:
           
           - [X] I've read the [contribution guidelines](../blob/HEAD/documentation/Contributing.md) and my PR follows them
           - [X] I own the code I'm submitting or have code owner's permission to submit it
-          - [X] I [have validated](../blob/HEAD/documentation/Contributing.md#validating-manifest) the manifest file(s) with `python3 tools/bundle.py --nolint ${{ steps.update_manifest.outputs.MANIFEST_PATH }} bundle.zip`
+          - [X] I [have validated](../blob/HEAD/documentation/Contributing.md#validating-manifest) the manifest file(s) with \`python3 tools/bundle.py --nolint ${{ steps.update_manifest.outputs.MANIFEST_PATH }} bundle.zip\`
           
           
           # Reviewer Checklist (Don't fill this out)
