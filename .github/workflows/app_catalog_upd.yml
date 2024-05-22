@@ -13,9 +13,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: zacharyweiss/flipper-app-catalog-action@main
+      - uses: zacharyweiss/flipper-app-catalog-action@v1.0
+        id: update_manifest
         with:
           CATALOG_UPDATE_TOKEN: ${{ secrets.CATALOG_UPDATE_TOKEN }}
           DRY_RUN: true
+    
+      - name: Auto-PR
+        run: |
+          cd flipper-application-catalog
+          echo "# Application Submission
 
- 
+          - Bumps ${{ steps.update_manifest.outputs.NAME }} to v${{ steps.update_manifest.outputs.V_MAJOR }}.${{ steps.update_manifest.outputs.V_MINOR }}" (${{ steps.update_manifest.outputs.OLD_SHA }} > ${{ github.sha }})
+          - Commits since last release:
+          ${{ steps.update_manifest.outputs.CHANGES }}
+          
+          # Extra Requirements 
+          Cf. original PR adding the app #375
+          
+          
+          # Author Checklist (Fill this out)
+          
+          - [X] I've read the [contribution guidelines](../blob/HEAD/documentation/Contributing.md) and my PR follows them
+          - [X] I own the code I'm submitting or have code owner's permission to submit it
+          - [X] I [have validated](../blob/HEAD/documentation/Contributing.md#validating-manifest) the manifest file(s) with `python3 tools/bundle.py --nolint ${{ steps.update_manifest.outputs.MANIFEST_PATH }} bundle.zip`
+          
+          
+          # Reviewer Checklist (Don't fill this out)
+          
+          - [ ] Bundle is valid
+          - [ ] There are no obvious issues with the source code
+          - [ ] I've ran this application and verified its functionality
+          
+          " | gh pr create \
+            --title "Update ${{ steps.update_manifest.outputs.NAME }} to v${{ steps.update_manifest.outputs.V_MAJOR }}.${{ steps.update_manifest.outputs.V_MINOR }}" \
+            --body-file - \
+            --base main \
+            --head ${{ steps.update_manifest.outputs.BRANCH_NAME }} \
+            --repo zacharyweiss/flipper-application-catalog \
+            --dry-run
+          env:
+            GH_TOKEN: ${{ secrets.CATALOG_UPDATE_TOKEN }}
