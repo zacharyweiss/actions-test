@@ -30,7 +30,9 @@ jobs:
           - Bumps ${{ steps.update_manifest.outputs.NAME }} to v${{ steps.update_manifest.outputs.V_MAJOR }}.${{ steps.update_manifest.outputs.V_MINOR }} (${SHORT_SHA_OLD}..${SHORT_SHA_NEW})
           - Commits since last release:
           
-          \`\`\`${{ steps.update_manifest.outputs.CHANGES }}\`\`\`
+          \`\`\`
+          ${{ steps.update_manifest.outputs.CHANGES }}
+          \`\`\`
           
           # Extra Requirements 
           Cf. original PR adding the app #375
