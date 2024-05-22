@@ -52,5 +52,5 @@ jobs:
             --head ${{ steps.update_manifest.outputs.BRANCH_NAME }} \
             --repo zacharyweiss/flipper-application-catalog \
             --dry-run
-          env:
-            GH_TOKEN: ${{ github.token }}
+        env:
+          GH_TOKEN: ${{ secrets.CATALOG_UPDATE_TOKEN }}
