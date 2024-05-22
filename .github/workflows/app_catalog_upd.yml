@@ -24,7 +24,7 @@ jobs:
           cd flipper-application-catalog
           echo "# Application Submission
 
-          - Bumps ${{ steps.update_manifest.outputs.NAME }} to v${{ steps.update_manifest.outputs.V_MAJOR }}.${{ steps.update_manifest.outputs.V_MINOR }}" (${{ steps.update_manifest.outputs.OLD_SHA }} > ${{ github.sha }})
+          - Bumps ${{ steps.update_manifest.outputs.NAME }} to v${{ steps.update_manifest.outputs.V_MAJOR }}.${{ steps.update_manifest.outputs.V_MINOR }} (${{ steps.update_manifest.outputs.OLD_SHA }} > ${{ github.sha }})
           - Commits since last release:
           ${{ steps.update_manifest.outputs.CHANGES }}
           
